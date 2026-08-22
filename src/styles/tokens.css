@@ -1,0 +1,77 @@
+/* Hallmark · component: app-shell (terminal environment) · genre: atmospheric · theme: Terminal
+ * tone: technical/austere · anchor hue: phosphor green 150° · mono-only on purpose
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * app-scope build: page macrostructure/nav/footer archetypes n/a
+ */
+
+:root {
+  /* paper */
+  --color-paper: oklch(16% 0.012 155);
+  --color-paper-raised: oklch(19% 0.014 155);
+  --color-paper-sunken: oklch(13% 0.01 155);
+  --color-rule: oklch(28% 0.015 155);
+  --color-rule-strong: oklch(38% 0.02 155);
+
+  /* ink */
+  --color-ink: oklch(87% 0.02 150);
+  --color-ink-dim: oklch(62% 0.02 150);
+  --color-ink-faint: oklch(46% 0.015 150);
+
+  /* accent + semantics */
+  --color-accent: oklch(80% 0.17 150);
+  --color-accent-dim: oklch(60% 0.12 150);
+  --color-danger: oklch(66% 0.19 25);
+  --color-warn: oklch(78% 0.14 85);
+  --color-info: oklch(75% 0.11 230);
+  --color-focus: oklch(80% 0.17 150);
+  --color-mark-bg: oklch(78% 0.14 85);
+  --color-mark-ink: oklch(18% 0.02 85);
+
+  /* per-host tints */
+  --color-host-amber: oklch(75% 0.13 70);
+  --color-host-cyan: oklch(76% 0.11 210);
+  --color-host-violet: oklch(72% 0.12 300);
+
+  /* ANSI 16 */
+  --ansi-0: oklch(25% 0.01 155);
+  --ansi-1: oklch(64% 0.19 25);
+  --ansi-2: oklch(75% 0.16 150);
+  --ansi-3: oklch(78% 0.14 85);
+  --ansi-4: oklch(68% 0.13 245);
+  --ansi-5: oklch(70% 0.15 320);
+  --ansi-6: oklch(76% 0.11 200);
+  --ansi-7: oklch(80% 0.02 150);
+  --ansi-8: oklch(48% 0.015 155);
+  --ansi-9: oklch(70% 0.21 25);
+  --ansi-10: oklch(83% 0.19 150);
+  --ansi-11: oklch(85% 0.16 90);
+  --ansi-12: oklch(75% 0.13 245);
+  --ansi-13: oklch(77% 0.16 320);
+  --ansi-14: oklch(83% 0.12 200);
+  --ansi-15: oklch(95% 0.01 150);
+
+  /* type — monospace-only is the design */
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --text-xs: 0.6875rem;
+  --text-sm: 0.78125rem;
+  --text-md: 0.8125rem;
+  --text-lg: 0.9375rem;
+
+  /* space (4pt) */
+  --space-2xs: 0.125rem;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-med: 200ms;
+
+  /* rules */
+  --rule-hairline: 1px solid var(--color-rule);
+}
