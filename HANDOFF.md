@@ -6,7 +6,9 @@ _Last updated: 2026-08-21 (session 1 — initial build)_
 
 - All requested feature areas built and verified in a real browser (28-check Playwright smoke, all passing, zero console errors).
 - `npm run build` (tsc + vite) is clean.
-- Deployment: see README badge/URL; deployed via `vercel --prod` (check whether GitHub→Vercel auto-deploy was wired before assuming pushes deploy).
+- LIVE at https://yuuki-terminal.vercel.app (public, verified in prod with a browser check).
+- Public repo: https://github.com/Gariyuuu/yuuki-terminal
+- **Deploys are manual**: `vercel deploy --prod` — GitHub→Vercel auto-deploy is NOT wired. Pushing alone does not deploy.
 
 ## Architecture (read this before touching anything)
 
