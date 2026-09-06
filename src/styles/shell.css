@@ -1,0 +1,455 @@
+/* ============================================================================
+ * YUUKI SHELL v1 — the shared shell language for the OS/comms/creative group
+ * ----------------------------------------------------------------------------
+ * This file is IDENTICAL in all 12 apps of the group. It is the chrome layer:
+ * geometry, density, focus, keyboard affordances, empty states, motion.
+ *
+ * It does NOT set colours. Each app keeps its own palette and maps it onto the
+ * bridge variables in the "BRIDGE" block below (see SHELL-SYSTEM.md). Every
+ * bridge var has a fallback so the shell degrades gracefully if unmapped.
+ *
+ * Load order in every app:   tokens.css  →  shell.css  →  app.css
+ * ==========================================================================*/
+
+:root {
+  /* ---- BRIDGE (apps override these; these are neutral fallbacks) -------- */
+  --shell-bg:            var(--sh-bg,            #0d0d10);
+  --shell-panel:         var(--sh-panel,         #16161b);
+  --shell-panel-2:       var(--sh-panel-2,       #1d1d23);
+  --shell-panel-3:       var(--sh-panel-3,       #26262e);
+  --shell-rule:          var(--sh-rule,          rgba(255,255,255,0.10));
+  --shell-rule-strong:   var(--sh-rule-strong,   rgba(255,255,255,0.20));
+  --shell-ink:           var(--sh-ink,           #f2f2f5);
+  --shell-ink-2:         var(--sh-ink-2,         #a8a8b4);
+  --shell-ink-3:         var(--sh-ink-3,         #6e6e7a);
+  --shell-accent:        var(--sh-accent,        #c8ff3d);
+  --shell-accent-ink:    var(--sh-accent-ink,    #0a0a0a);
+  --shell-accent-soft:   var(--sh-accent-soft,   rgba(200,255,61,0.14));
+  --shell-focus:         var(--sh-focus,         var(--shell-accent));
+  --shell-danger:        var(--sh-danger,        #ff4d67);
+  --shell-ok:            var(--sh-ok,            #3ddb92);
+  --shell-shadow:        var(--sh-shadow,        0 1px 2px rgba(0,0,0,.28), 0 12px 32px -8px rgba(0,0,0,.40));
+  --shell-shadow-pop:    var(--sh-shadow-pop,    0 2px 6px rgba(0,0,0,.30), 0 24px 60px -12px rgba(0,0,0,.55));
+  --shell-font-ui:       var(--sh-font-ui,       ui-sans-serif, system-ui, -apple-system, sans-serif);
+  --shell-font-mono:     var(--sh-font-mono,     ui-monospace, "SF Mono", Menlo, monospace);
+
+  /* ---- DENSITY SCALE — one scale, three densities ---------------------- */
+  /* Steps are fixed px, not rem: shell chrome must not resize with content. */
+  --d-1: 2px;
+  --d-2: 4px;
+  --d-3: 6px;
+  --d-4: 8px;
+  --d-5: 12px;
+  --d-6: 16px;
+  --d-7: 24px;
+  --d-8: 32px;
+  --d-9: 48px;
+
+  /* row heights — pick one per surface, never mix within a list */
+  --row-compact: 26px;   /* dense tables, terminal blocks, file lists      */
+  --row:         32px;   /* default: nav items, menu items, message rows   */
+  --row-loose:   40px;   /* touch / primary nav / mobile                   */
+
+  /* control heights */
+  --ctl-sm: 24px;
+  --ctl:    28px;
+  --ctl-lg: 34px;
+
+  /* window + panel chrome heights */
+  --titlebar-h: 34px;
+  --toolbar-h:  40px;
+  --statusbar-h: 26px;
+  --tabbar-h:   32px;
+
+  /* gutters */
+  --gutter-tight: var(--d-4);   /* inside dense rows            */
+  --gutter:       var(--d-5);   /* default panel inline padding */
+  --gutter-wide:  var(--d-7);   /* reading surfaces             */
+
+  /* ---- SHAPE ----------------------------------------------------------- */
+  --shell-r-sm: 5px;
+  --shell-r:    9px;
+  --shell-r-lg: 13px;
+  --shell-r-pill: 999px;
+  --hair: 1px solid var(--shell-rule);
+
+  /* ---- ICON SIZES — four semantic sizes, nothing else ------------------ */
+  --icon-sm:   14px;  /* inline with small/meta text          */
+  --icon:      16px;  /* default: buttons, rows, toolbars     */
+  --icon-nav:  18px;  /* sidebar / rail / primary nav         */
+  --icon-lg:   20px;  /* empty states, feature affordances    */
+  --icon-stroke: 1.75;
+  --icon-stroke-nav: 1.5;
+
+  /* ---- MOTION ---------------------------------------------------------- */
+  --m-fast:  110ms;   /* press feedback, hover fills          */
+  --m:       170ms;   /* menus, tabs, panel reveals           */
+  --m-slow:  260ms;   /* overlays, window open/close          */
+  --ease:        cubic-bezier(0.2, 0, 0, 1);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-spring: cubic-bezier(0.34, 1.35, 0.64, 1);
+
+  /* ---- FOCUS RING — identical in all 12 apps --------------------------- */
+  /* 2px halo of the surface colour, then a 2px accent ring. Works on any
+     background and never shifts layout (box-shadow, not outline width).    */
+  --focus-ring:       0 0 0 2px var(--shell-bg), 0 0 0 4px var(--shell-focus);
+  --focus-ring-tight: 0 0 0 2px var(--shell-focus);
+  --focus-ring-inset: inset 0 0 0 2px var(--shell-focus);
+
+  /* ---- Z SCALE --------------------------------------------------------- */
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-window: 30;
+  --z-popover: 40;
+  --z-overlay: 60;
+  --z-toast: 80;
+  --z-tooltip: 90;
+}
+
+/* ============================================================================
+ * FOCUS — one treatment, applied globally, no per-app variation
+ * ==========================================================================*/
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus { outline: none; }
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--shell-r-sm);
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+/* Edge-flush rows (list items, menu items, table cells) draw the ring inside
+   so it never gets clipped by an overflow container. */
+.shell-focus-inset:focus-visible,
+:where(.shell-row, .shell-menu-item, .shell-tab):focus-visible {
+  box-shadow: var(--focus-ring-inset);
+  border-radius: var(--shell-r-sm);
+}
+
+/* Elements whose own radius should win */
+:where(.shell-btn, .shell-iconbtn, .shell-input, .shell-kbd-target):focus-visible {
+  border-radius: inherit;
+}
+
+/* Keyboard-only surfaces: show the active descendant even without :focus */
+.shell-aria-active { box-shadow: var(--focus-ring-inset); }
+
+/* ============================================================================
+ * PANEL + WINDOW CHROME
+ * ==========================================================================*/
+
+.shell-panel {
+  background: var(--shell-panel);
+  border: var(--hair);
+  border-radius: var(--shell-r);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+.shell-panel--flush { border-radius: 0; border-width: 0; }
+.shell-panel--raised { box-shadow: var(--shell-shadow); }
+.shell-panel--pop { box-shadow: var(--shell-shadow-pop); }
+
+/* --- title bar: 34px, hairline underneath, title left, actions right ----- */
+.shell-titlebar {
+  height: var(--titlebar-h);
+  flex: 0 0 var(--titlebar-h);
+  display: flex;
+  align-items: center;
+  gap: var(--d-4);
+  padding: 0 var(--d-3) 0 var(--gutter);
+  border-bottom: var(--hair);
+  background: var(--shell-panel-2);
+  border-radius: var(--shell-r) var(--shell-r) 0 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.shell-panel--flush > .shell-titlebar { border-radius: 0; }
+
+.shell-titlebar-title {
+  font: 600 11px/1 var(--shell-font-ui);
+  letter-spacing: 0.045em;
+  color: var(--shell-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--m-fast) var(--ease);
+}
+.shell-titlebar-sub {
+  font: 400 11px/1 var(--shell-font-mono);
+  color: var(--shell-ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.shell-titlebar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--d-1);
+}
+
+/* Window focus is a first-class state: unfocused chrome recedes. */
+.shell-panel[data-focused="false"] { border-color: color-mix(in oklab, var(--shell-rule) 60%, transparent); }
+.shell-panel[data-focused="false"] .shell-titlebar { background: var(--shell-panel); }
+.shell-panel[data-focused="false"] .shell-titlebar-title { color: var(--shell-ink-3); }
+.shell-panel[data-focused="false"] .shell-titlebar-actions { opacity: 0.55; }
+
+/* --- resize affordances: invisible until hover, then an accent hairline -- */
+.shell-resize { position: absolute; z-index: 2; touch-action: none; }
+.shell-resize::after {
+  content: ""; position: absolute; inset: 0; opacity: 0;
+  background: var(--shell-accent);
+  transition: opacity var(--m-fast) var(--ease);
+}
+.shell-resize:hover::after, .shell-resize[data-active="true"]::after { opacity: 0.55; }
+
+.shell-resize--e  { top: var(--d-5); bottom: var(--d-5); right: -3px; width: 7px; cursor: ew-resize; }
+.shell-resize--e::after  { left: 3px; right: 3px; }
+.shell-resize--w  { top: var(--d-5); bottom: var(--d-5); left: -3px; width: 7px; cursor: ew-resize; }
+.shell-resize--w::after  { left: 3px; right: 3px; }
+.shell-resize--s  { left: var(--d-5); right: var(--d-5); bottom: -3px; height: 7px; cursor: ns-resize; }
+.shell-resize--s::after  { top: 3px; bottom: 3px; }
+.shell-resize--n  { left: var(--d-5); right: var(--d-5); top: -3px; height: 7px; cursor: ns-resize; }
+.shell-resize--n::after  { top: 3px; bottom: 3px; }
+.shell-resize--se { right: -3px; bottom: -3px; width: 14px; height: 14px; cursor: nwse-resize; }
+.shell-resize--sw { left: -3px; bottom: -3px; width: 14px; height: 14px; cursor: nesw-resize; }
+.shell-resize--ne { right: -3px; top: -3px; width: 14px; height: 14px; cursor: nesw-resize; }
+.shell-resize--nw { left: -3px; top: -3px; width: 14px; height: 14px; cursor: nwse-resize; }
+/* corner grip: two ticks, not a filled block */
+:where(.shell-resize--se, .shell-resize--sw, .shell-resize--ne, .shell-resize--nw)::after {
+  inset: 4px; border-radius: 2px;
+}
+
+/* --- split dividers between panes ---------------------------------------- */
+.shell-divider {
+  flex: 0 0 1px; position: relative; background: var(--shell-rule);
+  touch-action: none;
+}
+.shell-divider--v { cursor: col-resize; }
+.shell-divider--h { cursor: row-resize; height: 1px; width: auto; }
+.shell-divider::before {
+  content: ""; position: absolute; inset: -3px; z-index: 1;
+}
+.shell-divider::after {
+  content: ""; position: absolute; inset: 0; background: var(--shell-accent);
+  opacity: 0; transition: opacity var(--m-fast) var(--ease);
+}
+.shell-divider:hover::after, .shell-divider[data-active="true"]::after { opacity: 0.6; }
+
+/* --- status bar ----------------------------------------------------------- */
+.shell-statusbar {
+  height: var(--statusbar-h);
+  flex: 0 0 var(--statusbar-h);
+  display: flex; align-items: center; gap: var(--d-5);
+  padding: 0 var(--gutter);
+  border-top: var(--hair);
+  background: var(--shell-panel-2);
+  font: 400 11px/1 var(--shell-font-mono);
+  color: var(--shell-ink-3);
+  white-space: nowrap; overflow: hidden;
+}
+.shell-statusbar-hint { margin-left: auto; display: flex; align-items: center; gap: var(--d-4); }
+
+/* ============================================================================
+ * KEYBOARD AFFORDANCES
+ * The convention (see SHELL-SYSTEM.md §4):
+ *   1. every menu / command-palette row ends with its shortcut
+ *   2. every icon-only button's tooltip ends with its shortcut
+ *   3. every empty-state action shows its shortcut
+ *   4. every app with 3+ shortcuts has a `?` sheet listing all of them
+ *   5. the status bar surfaces the 2 most relevant contextual keys
+ * ==========================================================================*/
+
+kbd, .shell-kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  font: 500 10.5px/1 var(--shell-font-mono);
+  color: var(--shell-ink-2);
+  background: var(--shell-panel-3);
+  border: 1px solid var(--shell-rule);
+  border-bottom-color: var(--shell-rule-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.shell-kbd--dim { color: var(--shell-ink-3); background: transparent; }
+.shell-kbd--onaccent { color: var(--shell-accent-ink); background: rgba(0,0,0,0.14); border-color: rgba(0,0,0,0.22); }
+.shell-kbd-group { display: inline-flex; align-items: center; gap: 3px; }
+.shell-kbd-group .shell-kbd-plus { color: var(--shell-ink-3); font-size: 10px; }
+
+/* shortcut cluster pinned to the right of a row */
+.shell-shortcut { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; flex: none; }
+
+/* the `?` shortcut sheet */
+.shell-keysheet { display: grid; gap: var(--d-6); }
+.shell-keysheet-group { display: grid; gap: var(--d-1); }
+.shell-keysheet-group h4 {
+  font: 600 10px/1 var(--shell-font-ui); letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--shell-ink-3); margin-bottom: var(--d-3);
+}
+.shell-keyrow {
+  display: flex; align-items: center; gap: var(--d-5);
+  min-height: var(--row); padding: 0 var(--d-3);
+  border-radius: var(--shell-r-sm);
+  font: 400 12.5px/1.3 var(--shell-font-ui); color: var(--shell-ink-2);
+}
+.shell-keyrow:nth-child(odd) { background: color-mix(in oklab, var(--shell-panel-2) 55%, transparent); }
+
+/* ============================================================================
+ * EMPTY STATE — icon + one line + one action. Never more.
+ * ==========================================================================*/
+
+.shell-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--d-5);
+  padding: var(--d-8) var(--d-6);
+  margin: auto;
+  text-align: center;
+  min-height: 0;
+  animation: shell-empty-in var(--m-slow) var(--ease-out) both;
+}
+.shell-empty--inline { padding: var(--d-7) var(--d-5); gap: var(--d-4); }
+
+.shell-empty-icon {
+  width: 44px; height: 44px; flex: none;
+  display: grid; place-items: center;
+  border-radius: var(--shell-r-lg);
+  background: color-mix(in oklab, var(--shell-panel-2) 70%, transparent);
+  border: var(--hair);
+  color: var(--shell-ink-3);
+}
+.shell-empty-icon > svg { width: var(--icon-lg); height: var(--icon-lg); }
+
+.shell-empty-line {
+  max-width: 34ch;
+  font: 400 13px/1.5 var(--shell-font-ui);
+  color: var(--shell-ink-2);
+  margin: 0;
+  text-wrap: balance;
+}
+.shell-empty-line strong { color: var(--shell-ink); font-weight: 600; }
+
+.shell-empty-action {
+  display: inline-flex; align-items: center; gap: var(--d-4);
+  height: var(--ctl-lg); padding: 0 var(--d-5);
+  border-radius: var(--shell-r-sm);
+  border: var(--hair);
+  background: var(--shell-panel-2);
+  color: var(--shell-ink);
+  font: 500 12.5px/1 var(--shell-font-ui);
+  cursor: pointer;
+  transition: background var(--m-fast) var(--ease), border-color var(--m-fast) var(--ease), transform var(--m-fast) var(--ease);
+}
+.shell-empty-action:hover { background: var(--shell-panel-3); border-color: var(--shell-rule-strong); }
+.shell-empty-action:active { transform: scale(0.97); }
+.shell-empty-action--primary {
+  background: var(--shell-accent); color: var(--shell-accent-ink); border-color: transparent; font-weight: 600;
+}
+.shell-empty-action--primary:hover { background: var(--shell-accent); filter: brightness(1.06); }
+
+@keyframes shell-empty-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ============================================================================
+ * SHARED MICRO-CHROME (used by several apps; harmless where unused)
+ * ==========================================================================*/
+
+/* generic interactive row */
+.shell-row {
+  display: flex; align-items: center; gap: var(--d-4);
+  min-height: var(--row); padding: 0 var(--gutter-tight);
+  border-radius: var(--shell-r-sm);
+  color: var(--shell-ink-2);
+  transition: background var(--m-fast) var(--ease), color var(--m-fast) var(--ease);
+  cursor: pointer;
+}
+.shell-row:hover { background: var(--shell-panel-2); color: var(--shell-ink); }
+.shell-row[aria-selected="true"], .shell-row[data-selected="true"] {
+  background: var(--shell-panel-3); color: var(--shell-ink);
+}
+
+/* icon-only button */
+.shell-iconbtn {
+  width: var(--ctl); height: var(--ctl); flex: none;
+  display: grid; place-items: center;
+  border-radius: var(--shell-r-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--shell-ink-2);
+  cursor: pointer;
+  transition: background var(--m-fast) var(--ease), color var(--m-fast) var(--ease), transform var(--m-fast) var(--ease);
+}
+.shell-iconbtn:hover { background: var(--shell-panel-3); color: var(--shell-ink); }
+.shell-iconbtn:active { transform: scale(0.92); }
+.shell-iconbtn[data-active="true"], .shell-iconbtn[aria-pressed="true"] {
+  background: var(--shell-accent-soft); color: var(--shell-accent);
+}
+.shell-iconbtn:disabled { opacity: 0.35; cursor: default; }
+.shell-iconbtn > svg { width: var(--icon); height: var(--icon); }
+
+/* tooltip — the only place a shortcut is allowed to hide */
+.shell-tip { position: relative; }
+.shell-tip::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  padding: 4px 7px; border-radius: var(--shell-r-sm);
+  background: var(--shell-panel-3); border: var(--hair);
+  color: var(--shell-ink); font: 400 11px/1 var(--shell-font-ui);
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity var(--m-fast) var(--ease), transform var(--m-fast) var(--ease);
+  box-shadow: var(--shell-shadow); z-index: var(--z-tooltip);
+}
+.shell-tip:hover::after, .shell-tip:focus-visible::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+.shell-tip--below::after { bottom: auto; top: calc(100% + 6px); }
+
+/* skeleton */
+.shell-skel {
+  background: linear-gradient(90deg,
+    var(--shell-panel-2) 0%, var(--shell-panel-3) 50%, var(--shell-panel-2) 100%);
+  background-size: 200% 100%;
+  animation: shell-shimmer 1.25s linear infinite;
+  border-radius: var(--shell-r-sm);
+}
+@keyframes shell-shimmer { to { background-position: -200% 0; } }
+
+/* overlay + scrim */
+.shell-scrim {
+  position: fixed; inset: 0; z-index: var(--z-overlay);
+  background: rgba(0,0,0,0.42);
+  backdrop-filter: blur(2px);
+  animation: shell-fade-in var(--m) var(--ease) both;
+}
+@keyframes shell-fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes shell-pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+.shell-pop { animation: shell-pop-in var(--m) var(--ease-out) both; transform-origin: top center; }
+
+/* ============================================================================
+ * REDUCED MOTION — every app in the group honours this, no exceptions
+ * ==========================================================================*/
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --m-fast: 1ms;
+    --m: 1ms;
+    --m-slow: 1ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  .shell-skel { animation: none !important; background: var(--shell-panel-2); }
+}

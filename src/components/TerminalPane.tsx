@@ -4,6 +4,7 @@ import { BlockView } from "./BlockView";
 import { Composer } from "./Composer";
 import { listDir } from "../engine/vfs";
 import { normalize } from "../engine/vfs";
+import { X } from "lucide-react";
 
 const COMMON_COMMANDS = [
   "git status", "git log --oneline", "git diff", "cd", "ls", "cat", "grep -rn", "clear", "history", "ssh", "exit",
@@ -155,14 +156,17 @@ export function TerminalPane({ tabId, paneId, sessionId }: { tabId: string; pane
           <span className="ps-count">
             {query ? `${blocks.filter((b) => (b.output + b.command).toLowerCase().includes(query.toLowerCase())).length} blocks` : ""}
           </span>
-          <button onClick={() => { setSearchFor(null); setQuery(""); }} title="close search">✕</button>
+          <button onClick={() => { setSearchFor(null); setQuery(""); }} title="close search  ⎋" aria-label="close search"><X size={14} strokeWidth={1.75} /></button>
         </div>
       )}
       <div className="pane-scroll" ref={scrollRef} onScroll={onScroll} id={`pane-${paneId}`}>
         {blocks.length === 0 && (
           <div className="pane-empty">
             <span className="a-d"># {env.user}@{env.hostname} · {env.shell} · {p.path}</span>
-            <span className="a-d"># ⌘K compose from plain english · ⌃⌥H history · ⌘/ all shortcuts</span>
+            <span className="a-d">
+              # <kbd>⌘</kbd><kbd>K</kbd> compose from plain english ·{" "}
+              <kbd>⌃</kbd><kbd>⌥</kbd><kbd>H</kbd> history · <kbd>?</kbd> all shortcuts
+            </span>
           </div>
         )}
         {blocks.map((b) => (

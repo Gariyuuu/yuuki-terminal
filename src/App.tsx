@@ -26,6 +26,11 @@ export default function App() {
       }
       if (mod && e.key === "k") { e.preventDefault(); s.setComposerOpen(!s.composerOpen); return; }
       if (mod && e.key === "/") { e.preventDefault(); s.setShortcutsOpen(!s.shortcutsOpen); return; }
+      if (e.key === "?" && !mod && !e.ctrlKey) {
+        const el = e.target as HTMLElement | null;
+        const typing = !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+        if (!typing) { e.preventDefault(); s.setShortcutsOpen(!s.shortcutsOpen); return; }
+      }
       if (mod && !e.shiftKey && e.key === "d") { e.preventDefault(); s.splitPane("row"); return; }
       if (mod && e.shiftKey && e.key.toLowerCase() === "d") { e.preventDefault(); s.splitPane("col"); return; }
       if (mod && e.key === "f") {

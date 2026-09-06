@@ -3,6 +3,7 @@ import type { Block } from "../engine/types";
 import { Ansi, stripAnsi } from "../engine/ansi";
 import { getEnv, useStore } from "../state/store";
 import { displayPath } from "../engine/vfs";
+import { ChevronDown, ClipboardCopy, Copy, Pencil, RotateCw, Share2, Star } from "lucide-react";
 
 function fmtDuration(ms: number | null): string {
   if (ms === null) return "";
@@ -96,17 +97,27 @@ export const BlockView = React.memo(function BlockView({
           <span className="t">{fmtTime(block.startedAt)}</span>
           <span className="t">{running ? "running" : fmtDuration(block.durationMs)}</span>
           <span className="block-actions">
-            <button title="copy command" onClick={() => copy(block.command)}>⧉</button>
-            <button title="copy output" onClick={() => copy(stripAnsi(block.output))}>⇣</button>
-            <button title="share command + output" onClick={share}>⤴</button>
-            <button title="rerun" disabled={running} onClick={() => void runCommand(block.sessionId, block.command)}>↻</button>
-            <button title="edit & rerun" disabled={running} onClick={() => prefillPrompt(block.command, block.sessionId)}>✎</button>
-            <button title={block.bookmarked ? "remove bookmark" : "bookmark"} onClick={() => toggleBookmark(block.sessionId, block.id)}>
-              {block.bookmarked ? "★" : "☆"}
+            <button title="copy command" aria-label="copy command" onClick={() => copy(block.command)}><Copy size={14} strokeWidth={1.75} /></button>
+            <button title="copy output" aria-label="copy output" onClick={() => copy(stripAnsi(block.output))}><ClipboardCopy size={14} strokeWidth={1.75} /></button>
+            <button title="share command + output" aria-label="share" onClick={share}><Share2 size={14} strokeWidth={1.75} /></button>
+            <button title="rerun" aria-label="rerun" disabled={running} onClick={() => void runCommand(block.sessionId, block.command)}><RotateCw size={14} strokeWidth={1.75} /></button>
+            <button title="edit & rerun" aria-label="edit and rerun" disabled={running} onClick={() => prefillPrompt(block.command, block.sessionId)}><Pencil size={14} strokeWidth={1.75} /></button>
+            <button
+              title={block.bookmarked ? "remove bookmark" : "bookmark"}
+              aria-label={block.bookmarked ? "remove bookmark" : "bookmark"}
+              aria-pressed={block.bookmarked}
+              onClick={() => toggleBookmark(block.sessionId, block.id)}
+            >
+              <Star size={14} strokeWidth={1.75} fill={block.bookmarked ? "currentColor" : "none"} />
             </button>
             {lineCount > 0 && (
-              <button title={block.collapsed ? "expand output" : "collapse output"} onClick={() => toggleCollapse(block.sessionId, block.id)}>
-                {block.collapsed ? "▸" : "▾"}
+              <button
+                title={block.collapsed ? "expand output" : "collapse output"}
+                aria-label={block.collapsed ? "expand output" : "collapse output"}
+                aria-expanded={!block.collapsed}
+                onClick={() => toggleCollapse(block.sessionId, block.id)}
+              >
+                <ChevronDown size={14} strokeWidth={1.75} className={block.collapsed ? "chev chev--closed" : "chev"} />
               </button>
             )}
           </span>

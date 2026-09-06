@@ -75,3 +75,26 @@
   /* rules */
   --rule-hairline: 1px solid var(--color-rule);
 }
+
+/* ---- YUUKI SHELL bridge: phosphor-green palette → shared chrome ----
+ * The mono-only type voice is this app's identity and stays; only chrome
+ * geometry, the focus ring, keycaps and empty states are shared. */
+:root {
+  --sh-bg: var(--color-paper);
+  --sh-panel: var(--color-paper-raised);
+  --sh-panel-2: var(--color-paper-sunken);
+  --sh-panel-3: var(--color-rule);
+  --sh-rule: var(--color-rule);
+  --sh-rule-strong: var(--color-rule-strong);
+  --sh-ink: var(--color-ink);
+  --sh-ink-2: var(--color-ink-dim);
+  --sh-ink-3: var(--color-ink-faint);
+  --sh-accent: var(--color-accent);
+  --sh-accent-ink: var(--color-paper);
+  --sh-accent-soft: oklch(80% 0.17 150 / 0.14);
+  --sh-focus: var(--color-focus);
+  --sh-danger: var(--color-danger);
+  --sh-ok: var(--color-accent);
+  --sh-font-ui: var(--font-mono);
+  --sh-font-mono: var(--font-mono);
+}

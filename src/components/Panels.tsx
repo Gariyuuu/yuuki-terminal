@@ -3,6 +3,7 @@ import { analyzeFailure } from "../engine/failures";
 import type { ProcInfo } from "../engine/types";
 import { displayPath } from "../engine/vfs";
 import { ENVS, getEnv, HOSTS, sessionEnvId, useStore } from "../state/store";
+import { SearchX, X } from "lucide-react";
 
 function fmtAgo(t: number): string {
   const d = Date.now() - t;
@@ -51,10 +52,11 @@ function PanelHead({ title, hint }: { title: string; hint?: string }) {
       {hint && <span className="panel-hint">{hint}</span>}
       <button
         className="ghost"
-        title="close"
+        title="close  ⎋"
+        aria-label="close"
         onClick={() => (inspector ? closeInspector() : panel && togglePanel(panel))}
       >
-        ✕
+        <X size={14} strokeWidth={1.75} />
       </button>
     </div>
   );
@@ -141,7 +143,15 @@ export function HistoryPanel() {
             </div>
           </div>
         ))}
-        {rows.length === 0 && <p className="panel-empty">no matching commands</p>}
+        {rows.length === 0 && (
+          <div className="shell-empty shell-empty--inline">
+            <div className="shell-empty-icon"><SearchX /></div>
+            <p className="shell-empty-line">No commands in your history match that.</p>
+            <button type="button" className="shell-empty-action" onClick={() => { setQ(""); setEnvF("all"); setHostF("all"); setStatusF("all"); setRangeF("all"); }}>
+              Clear filters
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
@@ -414,7 +424,7 @@ export function LibraryPanel() {
                   {p.command}
                 </button>
                 {p.note && <span className="lib-note">{p.note}</span>}
-                <button className="ghost tiny" title="unpin" onClick={() => unpinCommand(p.id)}>✕</button>
+                <button className="ghost tiny" title="unpin" aria-label="unpin" onClick={() => unpinCommand(p.id)}><X size={14} strokeWidth={1.75} /></button>
               </div>
             ))}
           </div>

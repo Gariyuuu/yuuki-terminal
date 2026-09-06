@@ -24,12 +24,7 @@ button {
 button:hover { color: var(--color-ink); }
 button:active { transform: translateY(1px); }
 button:disabled { opacity: 0.4; cursor: default; transform: none; }
-button:focus-visible,
-input:focus-visible,
-select:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 1px;
-}
+/* Focus ring comes from shell.css (YUUKI SHELL §3) — identical in all 12 apps. */
 
 input, select {
   font: inherit;
@@ -45,12 +40,21 @@ input::placeholder { color: var(--color-ink-faint); }
 mark { background: var(--color-mark-bg); color: var(--color-mark-ink); }
 
 kbd {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  border: var(--rule-hairline);
-  border-bottom-width: 2px;
-  padding: 0 var(--space-xs);
-  color: var(--color-ink);
+  /* YUUKI SHELL §4.1 — same cap in every app in the group. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font: 500 10.5px/1 var(--font-mono);
+  border: 1px solid var(--color-rule);
+  border-bottom: 2px solid var(--color-rule-strong);
+  border-radius: 5px;
+  color: var(--color-ink-dim);
+  background: var(--color-paper-raised);
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 /* ---------- app frame ---------- */
@@ -599,9 +603,7 @@ kbd {
   padding: var(--space-md);
 }
 .shortcut-groups h3 { font-size: var(--text-xs); color: var(--color-ink-faint); padding-bottom: var(--space-xs); }
-.sc-row { display: flex; gap: var(--space-sm); padding: var(--space-2xs) 0; align-items: baseline; }
-.sc-row kbd { flex: 0 0 4.6rem; text-align: center; }
-.sc-row span { color: var(--color-ink-dim); font-size: var(--text-sm); }
+/* Shortcut rows come from shell.css (.shell-keyrow). */
 
 /* ---------- ANSI ---------- */
 
@@ -648,3 +650,31 @@ kbd {
   .sb-recent { display: none; }
   .cp-breakdown dt { flex-basis: 9rem; }
 }
+
+/* ============================================================================
+ * YUUKI SHELL integration — yuuki-terminal
+ * Chrome geometry, focus, keycaps and empty states come from shell.css. The
+ * monospace type voice and the terminal's own content glyphs (tree lines,
+ * process dots, ANSI marks) are identity and stay as they are.
+ * ==========================================================================*/
+
+/* chrome icons replaced text glyphs — centre them in their hit areas */
+.block-actions button,
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+.block-actions button svg, .ghost svg { flex: none; }
+
+/* the collapse chevron rotates rather than swapping glyph */
+.chev { transition: transform var(--m) var(--ease); }
+.chev--closed { transform: rotate(-90deg); }
+
+
+/* pane banner keys read as caps, inline with the comment line */
+.pane-empty kbd { margin: 0 1px; vertical-align: baseline; }
+
+/* one row density per list, from the three */
+.hist-row, .lib-row { min-height: var(--row-compact); }
